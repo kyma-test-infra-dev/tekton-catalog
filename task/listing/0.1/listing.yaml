@@ -1,0 +1,25 @@
+apiVersion: "tekton.dev/v1alpha1"
+kind: "Task"
+metadata:
+  name: "listing"
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.37.0"
+    tekton.dev/categories: "Automation"
+    tekton.dev/displayName: "Test workspace listing"
+spec:
+  description: |-
+    Workspace listing
+  resources:
+    inputs:
+      - name: git
+        type: git
+  steps:
+    - image: "alpine"
+      name: "listing"
+      script: |
+        #!/bin/sh
+       
+        pwd
+        ls -l /workspace/git

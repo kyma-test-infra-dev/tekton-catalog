@@ -1,0 +1,35 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: golint
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.37.0"
+    tekton.dev/categories: "Automation"
+    tekton.dev/displayName: "golint"
+spec:
+  description: |-
+    Linting golang
+  resources:
+    inputs:
+      - name: git
+        type: git
+        targetPath: go/src/github.com/kyma-project/test-infra
+  steps:
+    - image: "eu.gcr.io/kyma-project/test-infra/golangci-lint:v20221025-25ddc121"
+      name: "golint"
+      workingDir: "$(resources.inputs.git.path)"
+      timeout: 15m
+      command:
+        - "/golangci-lint.sh"
+          #script: |
+        #!/bin/sh
+      
+          #echo $GOROOT
+          #echo "Tried linting with golangci-lint image but failing with different error messages randomly. Give up."
+        
+      resources:
+        requests:
+          memory: 4Gi
+          cpu: 1

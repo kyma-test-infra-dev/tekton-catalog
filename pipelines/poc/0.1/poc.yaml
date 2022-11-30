@@ -1,0 +1,97 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: prototype-pipeline
+spec:
+  params:
+    - name: CI
+      type: string
+    - name: REPO_NAME
+      type: string
+    - name: REPO_OWNER
+      type: string
+    - name: BUILD_ID
+      type: string
+    - name: JOB_NAME
+      type: string
+    - name: JOB_TYPE
+      type: string
+    - name: PROW_JOB_ID
+      type: string
+    - name: PULL_BASE_REF
+      type: string
+    - name: PULL_BASE_SHA
+      type: string
+  workspaces:
+    - name: artifacts
+  resources:
+    - name: git
+      type: git
+  tasks:
+    - name: workspace-listing
+      taskRef:
+        name: listing
+      resources:
+        inputs:
+          - name: git
+            resource: git
+    - name: golint
+      taskRef:
+        name: golint
+      resources:
+        inputs:
+          - name: git
+            resource: git
+    - name: unit-test-go
+      taskRef:
+        name: unit-test-go
+      resources:
+        inputs:
+          - name: git
+            resource: git
+    - name: build-image
+      taskRef:
+        name: build-image
+      workspaces:
+        - name: artifacts
+      params:
+        - name: CI
+          value: "$(params.CI)"
+        - name: REPO_NAME
+          value: "$(params.REPO_NAME)"
+        - name: REPO_OWNER
+          value: "$(params.REPO_OWNER)"
+        - name: BUILD_ID
+          value: "$(params.BUILD_ID)"
+        - name: JOB_NAME
+          value: "$(params.JOB_NAME)"
+        - name: JOB_TYPE
+          value: "$(params.JOB_TYPE)"
+        - name: PROW_JOB_ID
+          value: "$(params.PROW_JOB_ID)"
+        - name: PULL_BASE_REF
+          value: "$(params.PULL_BASE_REF)"
+        - name: PULL_BASE_SHA
+          value: "$(params.PULL_BASE_SHA)"
+      runAfter:
+        - workspace-listing
+        - golint
+        - unit-test-go
+      resources:
+        inputs:
+          - name: git
+            resource: git
+    - name: security-scanners
+      taskRef:
+        name: sec-scanners
+      resources:
+        inputs:
+          - name: git
+            resource: git
+      runAfter:
+        - build-image
+    - name: good-bye
+      taskRef:
+        name: good-bye
+      runAfter:
+        - security-scanners

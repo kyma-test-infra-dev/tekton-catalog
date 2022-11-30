@@ -1,0 +1,18 @@
+apiVersion: "tekton.dev/v1alpha1"
+kind: "Task"
+metadata:
+  name: "push-image"
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.37.0"
+    tekton.dev/categories: "Automation"
+    tekton.dev/displayName: "Push build image to public repo"
+spec:
+  description: |-
+    Push build image to pubilc repo.
+  steps:
+    - image: "alpine"
+      name: "listing"
+      script: |
+        #!/bin/sh

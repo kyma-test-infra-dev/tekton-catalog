@@ -1,0 +1,31 @@
+apiVersion: "tekton.dev/v1alpha1"
+kind: "Task"
+metadata:
+  name: "sec-scanners"
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.37.0"
+    tekton.dev/categories: "Automation"
+    tekton.dev/displayName: "Run security scanners"
+spec:
+  description: |-
+    Run security scanners
+  resources:
+    inputs:
+      - name: git
+        type: git
+  steps:
+    - image: "alpine"
+      name: "call-scanners"
+      script: |
+        #!/bin/sh
+        
+        echo "Call security scanners"
+    - image: "alpine"
+      name: "wait-for-results"
+      script: |
+        #!/bin/sh
+        
+        sleep 120
+        echo "Wait for security scanning results"
